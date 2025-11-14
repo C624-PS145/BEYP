@@ -48,17 +48,34 @@ require('dotenv').config();
 
 const app = express();
 
-// CORS FIX
-app.use(
-  cors({
-    origin: [
-      "http://localhost:9000",
-      "https://your-frontend-domain.vercel.app"
-    ],
-    methods: "GET,POST,PUT,DELETE",
-    allowedHeaders: "Content-Type, Authorization",
-  })
-);
+// Whitelist of allowed origins for CORS
+const allowedOrigins = [
+  'http://localhost:9000', // Frontend dev server
+  'http://localhost:5174', // Admin panel dev server
+  process.env.FRONTEND_URL, // Deployed frontend URL from .env
+  process.env.ADMIN_URL     // Deployed admin panel URL from .env
+].filter(Boolean); // Filter out any undefined/empty values from process.env
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, server-to-server, or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in our whitelist
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // This is important for authenticated requests
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+
+// Middleware
+app.use(cors(corsOptions));
+// Explicitly handle preflight requests for all routes
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
@@ -73,6 +90,8 @@ const aboutRoutes = require('./routes/about');
 const portfolioContextRoutes = require('./routes/portfolioContext');
 const chatRoutes = require('./routes/chat');
 const authRoutes = require('./routes/auth');
+const uploadRoutes = require('./routes/upload');
+const technologyRoutes = require('./routes/technologies');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -85,14 +104,12 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/portfolio-context', portfolioContextRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/technologies', technologyRoutes);
 
-// Root route
+// Root route for testing
 app.get('/', (req, res) => {
-  res.send('Portfolio API is running on Vercel...');
+  res.send('Portfolio API is running...');
 });
 
-// ❗ Wajib dihapus untuk Vercel ❗
-// app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
-
-// Export default handler for Vercel
 module.exports = app;
