@@ -22,19 +22,8 @@
 // module.exports = pool.promise();
 
 const mysql = require('mysql2');
-require('dotenv').config();
 
-// --- Environment Variable Validation ---
-// Vercel serverless functions will crash if required environment variables are missing.
-// This check ensures that all necessary DB variables are present at startup.
-const requiredEnv = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
-const missingEnv = requiredEnv.filter(envVar => !process.env[envVar]);
-
-if (missingEnv.length > 0) {
-  // This will stop the serverless function from starting and provide a clear error in the Vercel logs.
-  throw new Error(`FATAL ERROR: Missing required environment variables for database connection: ${missingEnv.join(', ')}`);
-}
-// ------------------------------------
+// Environment variables and dotenv are now handled centrally in server.js
 
 // --- SSL Configuration ---
 // Cloud databases (often used with Vercel) typically require an SSL connection.

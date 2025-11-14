@@ -46,6 +46,25 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// --- Vercel Startup Validation ---
+// A comprehensive check for all required environment variables.
+// Vercel's "FUNCTION_INVOCATION_FAILED" error is often caused by a missing variable.
+// This block will crash the server intentionally with a clear, debuggable message in the Vercel logs.
+const requiredEnvVars = [
+    'DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', // Database
+    'JWT_SECRET',                                  // Auth
+    'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', // Cloudinary
+    'API_KEY'                                      // Google Gemini API Key for Chatbot
+];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingVars.length > 0) {
+    const errorMessage = `FATAL ERROR: Missing required environment variables: ${missingVars.join(', ')}. Please add them to your Vercel project settings.`;
+    console.error(errorMessage);
+    // This will cause the function to fail, but the log will show the specific reason.
+    throw new Error(errorMessage);
+}
+// --- End Validation ---
+
 const app = express();
 
 // Whitelist of allowed origins for CORS
