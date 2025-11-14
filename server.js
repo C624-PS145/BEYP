@@ -83,8 +83,8 @@ app.get('/', (req, res) => {
   res.send('Portfolio API is running...');
 });
 
-// ⛔ REMOVE app.listen()
-// ⛔ REMOVE process.on(...)
-
-// ✅ Export Express server for Vercel
-module.exports = app;
+// ⭐ Wajib untuk Railway ⭐
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
