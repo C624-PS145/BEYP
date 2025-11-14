@@ -42,19 +42,23 @@
 //   console.log(`Server is running on http://localhost:${PORT}`);
 // });
 
-
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: "*",        // atau origin frontend kamu
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type, Authorization"
-}));
+// CORS FIX
+app.use(
+  cors({
+    origin: [
+      "http://localhost:9000",
+      "https://your-frontend-domain.vercel.app"
+    ],
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type, Authorization",
+  })
+);
 
 app.use(express.json());
 
@@ -82,13 +86,13 @@ app.use('/api/about', aboutRoutes);
 app.use('/api/portfolio-context', portfolioContextRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Root
+// Root route
 app.get('/', (req, res) => {
   res.send('Portfolio API is running on Vercel...');
 });
 
-// ❗ Tidak boleh pakai app.listen() di Vercel ❗
-// app.listen(PORT, () => console.log(`Server running at ${PORT}`));
+// ❗ Wajib dihapus untuk Vercel ❗
+// app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
 
-// ⬇⬇ WAJIB untuk Vercel Serverless ⬇⬇
+// Export default handler for Vercel
 module.exports = app;
