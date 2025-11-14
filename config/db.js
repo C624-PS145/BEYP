@@ -21,7 +21,6 @@
 
 // module.exports = pool.promise();
 
-
 const mysql = require('mysql2');
 require('dotenv').config();
 
@@ -78,8 +77,7 @@ const getDbPool = () => {
   return cachedPool;
 };
 
-// 4. Ekspor fungsi yang mengelola singleton, bukan langsung `pool.promise()`.
-// Setiap controller sekarang akan memanggil getDbPool() untuk mendapatkan koneksi.
-// Namun, karena `require` di Node.js meng-cache modul, kita cukup mengekspor
-// hasil pemanggilan `getDbPool()` sekali saja.
+// 4. Ekspor hasil pemanggilan getDbPool(). Karena Node.js meng-cache module,
+// fungsi ini hanya akan dieksekusi sekali per instansi fungsi serverless (saat cold start).
+// Instansi yang 'hangat' akan mendapatkan kembali module yang sudah di-cache.
 module.exports = getDbPool();
