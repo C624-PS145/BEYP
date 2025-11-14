@@ -53,7 +53,7 @@ const createDbPool = () => {
     waitForConnections: true,
 
     // FREE TIER FIX
-    connectionLimit: 5,  
+    connectionLimit: 10,  
     queueLimit: 0,
 
     // Mencegah MySQL free tier menutup koneksi yang idle (penting!)
