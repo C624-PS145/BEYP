@@ -1,22 +1,29 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORTDB,
+let pool;
 
-  waitForConnections: true,
+if (!pool) {
+  pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORTDB,
 
-  // FREE TIER FIX
-  connectionLimit: 5,  
-  queueLimit: 0,
+    waitForConnections: true,
 
-  // Prevent MySQL free tier closing idle connections (penting!)
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
-});
+    // Fix limit FREE TIER 
+    connectionLimit: 5,
+    maxIdle: 5,
+    idleTimeout: 60000, // 60 detik
 
-module.exports = pool.promise();
+    queueLimit: 0,
+
+    // Prevent DB free-tier dari idle disconnect
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
+  });
+}
+
+module.exports = pool;
