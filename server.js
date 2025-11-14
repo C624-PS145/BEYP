@@ -77,32 +77,35 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Log the incoming origin for debugging. This is very useful on Vercel.
+    // Log incoming details for easier debugging on Vercel
     console.log(`CORS check: Request from origin [${origin}]`);
+    console.log(`Whitelist: [${allowedOrigins.join(', ')}]`);
 
-    // Allow requests with no origin (like mobile apps, server-to-server, or curl requests)
+    // Allow requests with no origin (like Postman, curl, or server-to-server)
     if (!origin) {
       console.log('CORS check: Allowing request with no origin.');
       return callback(null, true);
     }
-    
-    // Check if the origin is in our whitelist
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      console.log(`CORS check: Origin [${origin}] is in the whitelist. Allowing.`);
-      return callback(null, true);
+
+    // Normalize the origin by removing any trailing slash.
+    // This handles cases where the browser sends 'http://localhost:9000/' instead of 'http://localhost:9000'.
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      console.log(`CORS check: Normalized origin [${normalizedOrigin}] is in the whitelist. Allowing.`);
+      callback(null, true);
     } else {
-      const msg = `CORS check: Origin [${origin}] is NOT in the whitelist. Blocking.`;
+      const msg = `CORS check: Origin [${origin}] (normalized to [${normalizedOrigin}]) is NOT in the whitelist. Blocking.`;
       console.error(msg);
-      return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+      callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
     }
   },
-  credentials: true, // This is important for authenticated requests
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  credentials: true,
+  optionsSuccessStatus: 200,
 };
 
 // Middleware
 // The single app.use(cors(corsOptions)) handles all requests, including pre-flight OPTIONS.
-// Having a separate app.options('*', ...) can cause conflicts in serverless environments like Vercel.
 app.use(cors(corsOptions));
 
 app.use(express.json());
