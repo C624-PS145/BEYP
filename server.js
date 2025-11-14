@@ -42,6 +42,7 @@
 //   console.log(`Server is running on http://localhost:${PORT}`);
 // });
 
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -49,7 +50,12 @@ require('dotenv').config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "*",        // atau origin frontend kamu
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type, Authorization"
+}));
+
 app.use(express.json());
 
 // Import Routes
@@ -63,8 +69,6 @@ const aboutRoutes = require('./routes/about');
 const portfolioContextRoutes = require('./routes/portfolioContext');
 const chatRoutes = require('./routes/chat');
 const authRoutes = require('./routes/auth');
-const uploadRoutes = require('./routes/upload');
-const technologyRoutes = require('./routes/technologies');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -77,12 +81,14 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/portfolio-context', portfolioContextRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/technologies', technologyRoutes);
 
-// Root route for testing
+// Root
 app.get('/', (req, res) => {
-  res.send('Portfolio API is running...');
+  res.send('Portfolio API is running on Vercel...');
 });
 
+// ❗ Tidak boleh pakai app.listen() di Vercel ❗
+// app.listen(PORT, () => console.log(`Server running at ${PORT}`));
+
+// ⬇⬇ WAJIB untuk Vercel Serverless ⬇⬇
 module.exports = app;
